@@ -4,6 +4,8 @@ Editor de Markdown con vista previa instantánea e personalización de estilos, 
 
 [English version / Versión en inglés](README.md)
 
+![Captura de pantalla de Magnesium](resources/screenshot.png)
+
 ---
 
 ## Funcionalidades

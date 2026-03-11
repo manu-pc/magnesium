@@ -4,6 +4,8 @@ A Markdown editor with live preview and customizable styles for Linux.
 
 [Galician version / Versión en galego](README.gl.md)
 
+![Magnesium screenshot](resources/screenshot.png)
+
 ---
 
 ## Features
