@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="resources/icon.png" width="100" alt="Magnesium logo">
+</p>
+
 # Magnesium
 
 A Markdown editor with live preview and customizable styles for Linux.
