@@ -1,0 +1,47 @@
+#preview-content {
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+#preview-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+#preview-content pre {
+  overflow-x: auto;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+#preview-content pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+#preview-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+#preview-content th,
+#preview-content td {
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+#preview-content th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+#preview-content hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 24px 0;
+}
