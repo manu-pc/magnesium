@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown Editor</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/preview.css" />
+    <link id="highlight-css" rel="stylesheet" href="" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="toolbar"></div>
+      <div id="workspace">
+        <div id="editor-pane"></div>
+        <div id="splitter" class="splitter"></div>
+        <div id="preview-pane"><div id="preview-content"></div></div>
+      </div>
+    </div>
+    <div id="settings-panel" class="settings-panel"></div>
+    <div id="settings-overlay" class="settings-overlay"></div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>
