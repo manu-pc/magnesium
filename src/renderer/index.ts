@@ -1,5 +1,7 @@
 import './styles/main.css'
 import './styles/preview.css'
+import githubCss from 'highlight.js/styles/github.min.css?inline'
+import githubDarkCss from 'highlight.js/styles/github-dark.min.css?inline'
 import { initEditor, detectLanguage } from './editor/editorSetup'
 import type { FileLanguage, EditorInstance } from './editor/editorSetup'
 import { updatePreview, updateCodePreview, renderToHTMLString } from './preview/previewRenderer'
@@ -29,6 +31,7 @@ let isDirty = false
 let currentConfig: AppConfig
 let editorInstance: EditorInstance
 let tocVisible = false
+let splitterControls: { setPreviewCollapsed: (collapsed: boolean) => void } | null = null
 
 async function main(): Promise<void> {
   currentConfig = await window.electronAPI.getConfig()
@@ -46,7 +49,7 @@ async function main(): Promise<void> {
   editorInstance = initEditor(currentConfig, editorContainer, onEditorChange)
 
   initSettingsPanel(currentConfig, onStylesChange)
-  initSplitter(currentConfig.previewWidth)
+  splitterControls = initSplitter(currentConfig.previewWidth)
   initToolbar()
   initTOC()
   registerIPCListeners()
@@ -99,12 +102,13 @@ function updateWindowTitle(): void {
 }
 
 function setHighlightCSS(theme: 'light' | 'dark'): void {
-  const link = document.getElementById('highlight-css') as HTMLLinkElement
-  if (theme === 'dark') {
-    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
-  } else {
-    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+  let styleEl = document.getElementById('highlight-css') as HTMLStyleElement | null
+  if (!styleEl) {
+    styleEl = document.createElement('style')
+    styleEl.id = 'highlight-css'
+    document.head.appendChild(styleEl)
   }
+  styleEl.textContent = theme === 'dark' ? githubDarkCss : githubCss
   applySyntaxColorsCSS(theme)
 }
 
@@ -345,6 +349,7 @@ function loadFileData(data: { content: string; filePath: string | null }): void 
   editorInstance.setContent(currentContent, true)
   editorInstance.setLanguage(currentLanguage)
   updateLangBadge()
+  splitterControls?.setPreviewCollapsed(currentLanguage !== 'markdown')
   const previewContainer = document.getElementById('preview-content')!
   if (currentLanguage === 'markdown') {
     updatePreview(currentContent, currentConfig.markdownStyles, previewContainer, currentConfig.theme, currentConfig.customRules)
@@ -381,21 +386,109 @@ function toggleDarkMode(): void {
   applyTheme(isDark ? 'light' : 'dark')
 }
 
-function initSplitter(initialWidth: number): void {
+function initSplitter(initialWidth: number): { setPreviewCollapsed: (collapsed: boolean) => void } {
   const splitter = document.getElementById('splitter')!
   const editorPane = document.getElementById('editor-pane')!
+  const previewPane = document.getElementById('preview-pane')!
   const workspace = document.getElementById('workspace')!
+
+  splitter.innerHTML = `
+    <button class="collapse-btn" id="btn-collapse-editor" title="Colapsar editor">&#x25C0;</button>
+    <button class="collapse-btn" id="btn-collapse-preview" title="Colapsar vista previa">&#x25B6;</button>
+  `
 
   editorPane.style.flex = `0 0 ${initialWidth}%`
 
   let dragging = false
   let startX = 0
   let startFlex = initialWidth
+  let editorCollapsed = false
+  let previewCollapsed = false
+  let lastEditorWidth = initialWidth
+
+  function updateCollapseButtons(): void {
+    const btnEd = document.getElementById('btn-collapse-editor')!
+    const btnPr = document.getElementById('btn-collapse-preview')!
+    if (editorCollapsed) {
+      btnEd.innerHTML = '&#x25B6;'
+      btnEd.title = 'Expandir editor'
+    } else {
+      btnEd.innerHTML = '&#x25C0;'
+      btnEd.title = 'Colapsar editor'
+    }
+    if (previewCollapsed) {
+      btnPr.innerHTML = '&#x25C0;'
+      btnPr.title = 'Expandir vista previa'
+    } else {
+      btnPr.innerHTML = '&#x25B6;'
+      btnPr.title = 'Colapsar vista previa'
+    }
+  }
+
+  function collapseEditor(): void {
+    lastEditorWidth = parseFloat(editorPane.style.flex.split(' ')[2]) || lastEditorWidth
+    editorCollapsed = true
+    editorPane.style.flex = '0 0 0'
+    editorPane.style.overflow = 'hidden'
+    editorPane.style.minWidth = '0'
+    editorPane.style.borderRight = 'none'
+  }
+
+  function expandEditor(): void {
+    editorCollapsed = false
+    editorPane.style.flex = `0 0 ${lastEditorWidth}%`
+    editorPane.style.overflow = ''
+    editorPane.style.minWidth = ''
+    editorPane.style.borderRight = ''
+  }
+
+  function collapsePreview(): void {
+    lastEditorWidth = parseFloat(editorPane.style.flex.split(' ')[2]) || lastEditorWidth
+    previewCollapsed = true
+    previewPane.style.flex = '0 0 0'
+    previewPane.style.overflow = 'hidden'
+    previewPane.style.minWidth = '0'
+    previewPane.style.padding = '0'
+    editorPane.style.flex = '1 1 auto'
+  }
+
+  function expandPreview(): void {
+    previewCollapsed = false
+    previewPane.style.flex = ''
+    previewPane.style.overflow = ''
+    previewPane.style.minWidth = ''
+    previewPane.style.padding = ''
+    editorPane.style.flex = `0 0 ${lastEditorWidth}%`
+  }
+
+  document.getElementById('btn-collapse-editor')!.addEventListener('click', (e) => {
+    e.stopPropagation()
+    if (editorCollapsed) {
+      expandEditor()
+      if (previewCollapsed) expandPreview()
+    } else {
+      collapseEditor()
+    }
+    updateCollapseButtons()
+  })
+
+  document.getElementById('btn-collapse-preview')!.addEventListener('click', (e) => {
+    e.stopPropagation()
+    if (previewCollapsed) {
+      expandPreview()
+      if (editorCollapsed) expandEditor()
+    } else {
+      collapsePreview()
+    }
+    updateCollapseButtons()
+  })
 
   splitter.addEventListener('mousedown', (e) => {
+    if ((e.target as HTMLElement).closest('.collapse-btn')) return
+    if (editorCollapsed || previewCollapsed) return
     dragging = true
     startX = e.clientX
-    startFlex = parseFloat(editorPane.style.flex.split(' ')[2]) || initialWidth
+    startFlex = parseFloat(editorPane.style.flex.split(' ')[2]) || lastEditorWidth
     splitter.classList.add('dragging')
     workspace.style.pointerEvents = 'none'
     workspace.style.userSelect = 'none'
@@ -416,8 +509,21 @@ function initSplitter(initialWidth: number): void {
     workspace.style.pointerEvents = ''
     workspace.style.userSelect = ''
     const currentPct = parseFloat(editorPane.style.flex.split(' ')[2]) || 50
+    lastEditorWidth = currentPct
     window.electronAPI.setConfig('previewWidth', currentPct)
   })
+
+  return {
+    setPreviewCollapsed: (collapsed: boolean) => {
+      if (collapsed && !previewCollapsed) {
+        collapsePreview()
+        updateCollapseButtons()
+      } else if (!collapsed && previewCollapsed) {
+        expandPreview()
+        updateCollapseButtons()
+      }
+    }
+  }
 }
 
 function registerIPCListeners(): void {

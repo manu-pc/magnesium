@@ -14,9 +14,10 @@ const SUPPORTED_EXTS = new Set([
 ])
 
 /** Return a file path passed as CLI argument (e.g. when launched via file-manager association). */
-function getCliFile(): string | null {
+function getCliFile(argv?: string[]): string | null {
   // In packaged app argv[0] is the executable; in dev argv[0]=electron, argv[1]=script
-  const args = process.argv.slice(app.isPackaged ? 1 : 2)
+  const rawArgs = argv ?? process.argv
+  const args = rawArgs.slice(app.isPackaged ? 1 : 2)
   for (const arg of args) {
     if (arg.startsWith('-')) continue
     const resolved = path.resolve(arg)
@@ -25,6 +26,21 @@ function getCliFile(): string | null {
     }
   }
   return null
+}
+
+function openCliFileInWindow(argv: string[]): void {
+  const cliFile = getCliFile(argv)
+  if (!cliFile || !mainWindow) return
+  try {
+    const content = fs.readFileSync(cliFile, 'utf-8')
+    const recentFiles = store.get('recentFiles') as string[]
+    const filtered = recentFiles.filter((f) => f !== cliFile)
+    filtered.unshift(cliFile)
+    store.set('recentFiles', filtered.slice(0, 10))
+    store.set('lastOpenedFile', cliFile)
+    mainWindow.webContents.send(IPC.FILE_LOADED, { content, filePath: cliFile })
+    rebuildMenu(store, mainWindow)
+  } catch { /* ignore */ }
 }
 
 // Suppress Autofill DevTools noise
@@ -168,14 +184,28 @@ ipcMain.handle(IPC.MENU_REBUILD, (_event, lang: string) => {
   if (mainWindow) rebuildMenu(store, mainWindow)
 })
 
-app.whenReady().then(async () => {
-  await initStylesFolder(app.getPath('userData'))
-  createWindow()
+const gotTheLock = app.requestSingleInstanceLock()
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (_event, argv) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+    openCliFileInWindow(argv)
   })
-})
+
+  app.whenReady().then(async () => {
+    await initStylesFolder(app.getPath('userData'))
+    createWindow()
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
+  })
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

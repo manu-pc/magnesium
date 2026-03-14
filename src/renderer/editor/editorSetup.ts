@@ -112,6 +112,11 @@ export function initEditor(
   container.style.flexDirection = 'column'
   container.style.height = '100%'
 
+  container.addEventListener('wheel', (e) => {
+    view.scrollDOM.scrollTop += e.deltaY
+    e.preventDefault()
+  }, { passive: false })
+
   return {
     view,
     reconfigureTheme: (newConfig: AppConfig) => {

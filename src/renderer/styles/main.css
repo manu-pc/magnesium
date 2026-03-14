@@ -8,7 +8,7 @@
   --border-color: #e0e0e0;
   --accent-color: #2563eb;
   --toolbar-height: 48px;
-  --splitter-width: 4px;
+  --splitter-width: 20px;
 }
 
 [data-theme="dark"] {
@@ -344,17 +344,59 @@ body {
 /* Splitter */
 .splitter {
   width: var(--splitter-width);
-  background-color: var(--border-color);
+  background-color: transparent;
   cursor: col-resize;
   flex-shrink: 0;
-  transition: background-color 0.15s;
   position: relative;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
 }
 
-.splitter:hover,
-.splitter.dragging {
+.splitter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  background-color: var(--border-color);
+  transition: background-color 0.15s;
+  pointer-events: none;
+}
+
+.splitter:hover::before,
+.splitter.dragging::before {
   background-color: var(--accent-color);
+}
+
+.collapse-btn {
+  width: 16px;
+  height: 28px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  line-height: 1;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.collapse-btn:hover {
+  background-color: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
 }
 
 /* Preview Pane */
