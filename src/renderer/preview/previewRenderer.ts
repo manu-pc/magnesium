@@ -372,8 +372,10 @@ export async function renderToHTMLString(
 <style>
 body {
   background-color: #ffffff;
-  color: #1a1a1a;
-  font-family: system-ui, sans-serif;
+  color: ${styles.paragraph.color};
+  font-family: ${styles.paragraph.fontFamily};
+  font-size: ${styles.paragraph.fontSize}px;
+  line-height: ${styles.paragraph.lineHeight};
   padding: 40px;
 }
 #preview-content {
