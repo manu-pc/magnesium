@@ -1,7 +1,7 @@
 {
   "name": "magnesium",
   "productName": "Magnesium",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A fast, distraction-free Markdown editor for the desktop",
   "main": "./out/main/index.js",
   "author": {
@@ -44,22 +44,102 @@
       }
     ],
     "fileAssociations": [
-      { "ext": "md",       "name": "Markdown Document", "mimeType": "text/markdown",            "role": "Editor" },
-      { "ext": "markdown", "name": "Markdown Document", "mimeType": "text/markdown",            "role": "Editor" },
-      { "ext": "txt",      "name": "Text File",         "mimeType": "text/plain",               "role": "Editor" },
-      { "ext": "c",        "name": "C Source",          "mimeType": "text/x-csrc",              "role": "Editor" },
-      { "ext": "h",        "name": "C Header",          "mimeType": "text/x-chdr",              "role": "Editor" },
-      { "ext": "cpp",      "name": "C++ Source",        "mimeType": "text/x-c++src",            "role": "Editor" },
-      { "ext": "cc",       "name": "C++ Source",        "mimeType": "text/x-c++src",            "role": "Editor" },
-      { "ext": "cxx",      "name": "C++ Source",        "mimeType": "text/x-c++src",            "role": "Editor" },
-      { "ext": "hpp",      "name": "C++ Header",        "mimeType": "text/x-c++hdr",            "role": "Editor" },
-      { "ext": "java",     "name": "Java Source",       "mimeType": "text/x-java",              "role": "Editor" },
-      { "ext": "py",       "name": "Python Script",     "mimeType": "text/x-python",            "role": "Editor" },
-      { "ext": "html",     "name": "HTML Document",     "mimeType": "text/html",                "role": "Editor" },
-      { "ext": "htm",      "name": "HTML Document",     "mimeType": "text/html",                "role": "Editor" },
-      { "ext": "css",      "name": "CSS Stylesheet",    "mimeType": "text/css",                 "role": "Editor" },
-      { "ext": "js",       "name": "JavaScript",        "mimeType": "application/javascript",   "role": "Editor" },
-      { "ext": "ts",       "name": "TypeScript",        "mimeType": "application/typescript",   "role": "Editor" }
+      {
+        "ext": "md",
+        "name": "Markdown Document",
+        "mimeType": "text/markdown",
+        "role": "Editor"
+      },
+      {
+        "ext": "markdown",
+        "name": "Markdown Document",
+        "mimeType": "text/markdown",
+        "role": "Editor"
+      },
+      {
+        "ext": "txt",
+        "name": "Text File",
+        "mimeType": "text/plain",
+        "role": "Editor"
+      },
+      {
+        "ext": "c",
+        "name": "C Source",
+        "mimeType": "text/x-csrc",
+        "role": "Editor"
+      },
+      {
+        "ext": "h",
+        "name": "C Header",
+        "mimeType": "text/x-chdr",
+        "role": "Editor"
+      },
+      {
+        "ext": "cpp",
+        "name": "C++ Source",
+        "mimeType": "text/x-c++src",
+        "role": "Editor"
+      },
+      {
+        "ext": "cc",
+        "name": "C++ Source",
+        "mimeType": "text/x-c++src",
+        "role": "Editor"
+      },
+      {
+        "ext": "cxx",
+        "name": "C++ Source",
+        "mimeType": "text/x-c++src",
+        "role": "Editor"
+      },
+      {
+        "ext": "hpp",
+        "name": "C++ Header",
+        "mimeType": "text/x-c++hdr",
+        "role": "Editor"
+      },
+      {
+        "ext": "java",
+        "name": "Java Source",
+        "mimeType": "text/x-java",
+        "role": "Editor"
+      },
+      {
+        "ext": "py",
+        "name": "Python Script",
+        "mimeType": "text/x-python",
+        "role": "Editor"
+      },
+      {
+        "ext": "html",
+        "name": "HTML Document",
+        "mimeType": "text/html",
+        "role": "Editor"
+      },
+      {
+        "ext": "htm",
+        "name": "HTML Document",
+        "mimeType": "text/html",
+        "role": "Editor"
+      },
+      {
+        "ext": "css",
+        "name": "CSS Stylesheet",
+        "mimeType": "text/css",
+        "role": "Editor"
+      },
+      {
+        "ext": "js",
+        "name": "JavaScript",
+        "mimeType": "application/javascript",
+        "role": "Editor"
+      },
+      {
+        "ext": "ts",
+        "name": "TypeScript",
+        "mimeType": "application/typescript",
+        "role": "Editor"
+      }
     ],
     "linux": {
       "target": [
