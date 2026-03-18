@@ -168,6 +168,27 @@ ipcMain.handle(IPC.SHOW_DISCARD_DIALOG, async () => {
   return response === 0
 })
 
+// Image picker — opens a file dialog and returns a base64 data URI
+ipcMain.handle(IPC.IMAGE_PICK, async () => {
+  if (!mainWindow) return null
+  const result = await dialog.showOpenDialog(mainWindow, {
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'] }],
+    properties: ['openFile']
+  })
+  if (result.canceled || result.filePaths.length === 0) return null
+  const filePath = result.filePaths[0]
+  const ext = path.extname(filePath).slice(1).toLowerCase()
+  const mimeMap: Record<string, string> = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', bmp: 'image/bmp'
+  }
+  const mimeType = mimeMap[ext] ?? `image/${ext}`
+  const data = fs.readFileSync(filePath)
+  const base64 = data.toString('base64')
+  const name = path.basename(filePath, path.extname(filePath))
+  return { dataUri: `data:${mimeType};base64,${base64}`, name }
+})
+
 // Open external URLs safely in the system browser
 ipcMain.handle(IPC.SHELL_OPEN_EXTERNAL, (_event, url: string) => {
   try {

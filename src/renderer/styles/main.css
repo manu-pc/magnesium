@@ -710,3 +710,34 @@ body {
 .cm-editor .cm-selectionLayer .cm-selectionBackground {
   opacity: 1 !important;
 }
+
+/* Inline image widget in editor */
+.cm-image-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  cursor: text;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+.cm-image-thumb {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.cm-image-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}

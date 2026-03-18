@@ -13,6 +13,7 @@ import { drawSelection } from '@codemirror/view'
 import { indentMore, indentLess } from '@codemirror/commands'
 import { openSearchPanel } from '@codemirror/search'
 import { createEditorTheme } from './syntaxTheme'
+import { imageWidgetPlugin } from './imageWidget'
 import type { AppConfig } from '../../shared/types'
 
 export type FileLanguage = 'markdown' | 'javascript' | 'typescript' | 'html' | 'css' | 'python' | 'java' | 'cpp'
@@ -95,6 +96,36 @@ export function initEditor(
     }
   })
 
+  const imagePasteHandler = EditorView.domEventHandlers({
+    paste(event, view) {
+      const items = event.clipboardData?.items
+      if (!items) return false
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (item.type.startsWith('image/')) {
+          event.preventDefault()
+          const blob = item.getAsFile()
+          if (!blob) continue
+          const reader = new FileReader()
+          reader.onload = () => {
+            const dataUri = reader.result as string
+            const markdown = `![image](${dataUri})`
+            const selection = view.state.selection.main
+            const line = view.state.doc.lineAt(selection.head)
+            const prefix = line.text.trim().length > 0 ? '\n\n' : ''
+            view.dispatch({
+              changes: { from: selection.head, insert: prefix + markdown },
+              selection: { anchor: selection.head + prefix.length + markdown.length }
+            })
+          }
+          reader.readAsDataURL(blob)
+          return true
+        }
+      }
+      return false
+    }
+  })
+
   const view = new EditorView({
     extensions: [
       listIndentKeymap,
@@ -103,7 +134,9 @@ export function initEditor(
       EditorView.lineWrapping,
       drawSelection(),
       themeCompartment.of(createEditorTheme(config)),
-      updateListener
+      updateListener,
+      imagePasteHandler,
+      imageWidgetPlugin
     ],
     parent: container
   })

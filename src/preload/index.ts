@@ -61,5 +61,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   confirmClose: () => ipcRenderer.send(IPC.WINDOW_CLOSE_CONFIRMED),
-  cancelClose: () => ipcRenderer.send(IPC.WINDOW_CLOSE_CANCELLED)
+  cancelClose: () => ipcRenderer.send(IPC.WINDOW_CLOSE_CANCELLED),
+  pickImage: () => ipcRenderer.invoke(IPC.IMAGE_PICK)
 })

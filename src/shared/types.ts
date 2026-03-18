@@ -151,6 +151,7 @@ export const IPC = {
   MENU_REBUILD: 'menu:rebuild',
   SHOW_CLOSE_DIALOG: 'dialog:close-confirm',
   SHOW_DISCARD_DIALOG: 'dialog:discard-confirm',
+  IMAGE_PICK: 'image:pick',
 } as const
 
 export const DEFAULT_PDF_EXPORT: PdfExportConfig = {
@@ -265,4 +266,5 @@ export interface WindowAPI {
   offConfigChanged: (callback: (config: AppConfig) => void) => void
   confirmClose: () => void
   cancelClose: () => void
+  pickImage: () => Promise<{ dataUri: string; name: string } | null>
 }

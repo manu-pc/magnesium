@@ -270,6 +270,24 @@ function insertTable(rows: number, cols: number): void {
   view.focus()
 }
 
+// ---- Image insertion ----
+
+async function insertImage(): Promise<void> {
+  const result = await window.electronAPI.pickImage()
+  if (!result) return
+  const { dataUri, name } = result
+  const markdown = `![${name}](${dataUri})`
+  const view = editorInstance.view
+  const selection = view.state.selection.main
+  const line = view.state.doc.lineAt(selection.head)
+  const prefix = line.text.trim().length > 0 ? '\n\n' : ''
+  view.dispatch({
+    changes: { from: selection.head, insert: prefix + markdown },
+    selection: { anchor: selection.head + prefix.length + markdown.length }
+  })
+  view.focus()
+}
+
 // ---- Toolbar ----
 
 function initToolbar(): void {
@@ -281,6 +299,7 @@ function initToolbar(): void {
     <div class="toolbar-separator"></div>
     <button class="toolbar-btn" id="btn-search" title="Search / Replace (Ctrl+F)">&#x1F50D;</button>
     <button class="toolbar-btn" id="btn-table" title="Insert Table">&#x229E;</button>
+    <button class="toolbar-btn" id="btn-image" title="Insert Image">&#x1F5BC;</button>
     <button class="toolbar-btn" id="btn-toc" title="Header Index">&#x2630;</button>
     <div class="toolbar-separator"></div>
     <span id="file-lang-badge" class="file-lang-badge" style="display:none"></span>
@@ -295,6 +314,7 @@ function initToolbar(): void {
   document.getElementById('btn-save')!.addEventListener('click', saveFile)
   document.getElementById('btn-search')!.addEventListener('click', () => editorInstance.openSearch())
   document.getElementById('btn-table')!.addEventListener('click', showTableDialog)
+  document.getElementById('btn-image')!.addEventListener('click', insertImage)
   document.getElementById('btn-toc')!.addEventListener('click', toggleTOC)
   document.getElementById('btn-export-pdf')!.addEventListener('click', exportPDF)
   document.getElementById('btn-dark-mode')!.addEventListener('click', toggleDarkMode)
