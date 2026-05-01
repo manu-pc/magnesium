@@ -62,5 +62,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   confirmClose: () => ipcRenderer.send(IPC.WINDOW_CLOSE_CONFIRMED),
   cancelClose: () => ipcRenderer.send(IPC.WINDOW_CLOSE_CANCELLED),
-  pickImage: () => ipcRenderer.invoke(IPC.IMAGE_PICK)
+  pickImage: () => ipcRenderer.invoke(IPC.IMAGE_PICK),
+  readRelativeImage: (baseDir: string, relPath: string) => ipcRenderer.invoke(IPC.IMAGE_READ_RELATIVE, { baseDir, relPath })
 })

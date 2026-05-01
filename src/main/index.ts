@@ -168,6 +168,18 @@ ipcMain.handle(IPC.SHOW_DISCARD_DIALOG, async () => {
   return response === 0
 })
 
+const IMAGE_MIME_MAP: Record<string, string> = {
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+  gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', bmp: 'image/bmp'
+}
+
+function readImageAsDataUri(filePath: string): string {
+  const ext = path.extname(filePath).slice(1).toLowerCase()
+  const mimeType = IMAGE_MIME_MAP[ext] ?? `image/${ext}`
+  const base64 = fs.readFileSync(filePath).toString('base64')
+  return `data:${mimeType};base64,${base64}`
+}
+
 // Image picker — opens a file dialog and returns a base64 data URI
 ipcMain.handle(IPC.IMAGE_PICK, async () => {
   if (!mainWindow) return null
@@ -177,16 +189,22 @@ ipcMain.handle(IPC.IMAGE_PICK, async () => {
   })
   if (result.canceled || result.filePaths.length === 0) return null
   const filePath = result.filePaths[0]
-  const ext = path.extname(filePath).slice(1).toLowerCase()
-  const mimeMap: Record<string, string> = {
-    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml', bmp: 'image/bmp'
-  }
-  const mimeType = mimeMap[ext] ?? `image/${ext}`
-  const data = fs.readFileSync(filePath)
-  const base64 = data.toString('base64')
+  const dataUri = readImageAsDataUri(filePath)
   const name = path.basename(filePath, path.extname(filePath))
-  return { dataUri: `data:${mimeType};base64,${base64}`, name }
+  return { dataUri, name }
+})
+
+// Read an image referenced by a path relative to the open file's directory.
+ipcMain.handle(IPC.IMAGE_READ_RELATIVE, async (_event, payload: { baseDir: string; relPath: string }) => {
+  const { baseDir, relPath } = payload || {}
+  if (!baseDir || !relPath) return null
+  const resolved = path.resolve(baseDir, relPath)
+  const baseReal = path.resolve(baseDir) + path.sep
+  if (!resolved.startsWith(baseReal) && resolved !== path.resolve(baseDir)) return null
+  if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) return null
+  const ext = path.extname(resolved).slice(1).toLowerCase()
+  if (!IMAGE_MIME_MAP[ext]) return null
+  return { dataUri: readImageAsDataUri(resolved) }
 })
 
 // Open external URLs safely in the system browser

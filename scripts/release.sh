@@ -40,7 +40,7 @@ node -e "
 
 git add package.json
 git commit -m "release $NEW_VERSION"
-git tag "$NEW_VERSION"
+git tag -a "$NEW_VERSION" -m "release $NEW_VERSION"
 
 echo ""
 echo "Created commit and tag $NEW_VERSION"

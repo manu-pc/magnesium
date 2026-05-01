@@ -13,7 +13,7 @@ import { drawSelection } from '@codemirror/view'
 import { indentMore, indentLess } from '@codemirror/commands'
 import { openSearchPanel } from '@codemirror/search'
 import { createEditorTheme } from './syntaxTheme'
-import { imageWidgetPlugin } from './imageWidget'
+import { imageWidgetPlugin, baseDirFacet } from './imageWidget'
 import type { AppConfig } from '../../shared/types'
 
 export type FileLanguage = 'markdown' | 'javascript' | 'typescript' | 'html' | 'css' | 'python' | 'java' | 'cpp'
@@ -53,6 +53,7 @@ export interface EditorInstance {
   setContent: (content: string, silent?: boolean) => void
   setLanguage: (lang: FileLanguage) => void
   openSearch: () => void
+  setBaseDir: (dir: string | null) => void
 }
 
 const LIST_ITEM_RE = /^\s*([-*+>]|\d+[.)]) /
@@ -83,6 +84,7 @@ export function initEditor(
 ): EditorInstance {
   const themeCompartment = new Compartment()
   const languageCompartment = new Compartment()
+  const baseDirCompartment = new Compartment()
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
   let silent = false
@@ -136,7 +138,8 @@ export function initEditor(
       themeCompartment.of(createEditorTheme(config)),
       updateListener,
       imagePasteHandler,
-      imageWidgetPlugin
+      imageWidgetPlugin,
+      baseDirCompartment.of(baseDirFacet.of(null))
     ],
     parent: container
   })
@@ -178,6 +181,11 @@ export function initEditor(
     openSearch: () => {
       view.focus()
       openSearchPanel(view)
+    },
+    setBaseDir: (dir: string | null) => {
+      view.dispatch({
+        effects: baseDirCompartment.reconfigure(baseDirFacet.of(dir))
+      })
     }
   }
 }

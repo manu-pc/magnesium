@@ -152,6 +152,7 @@ export const IPC = {
   SHOW_CLOSE_DIALOG: 'dialog:close-confirm',
   SHOW_DISCARD_DIALOG: 'dialog:discard-confirm',
   IMAGE_PICK: 'image:pick',
+  IMAGE_READ_RELATIVE: 'image:read-relative',
 } as const
 
 export const DEFAULT_PDF_EXPORT: PdfExportConfig = {
@@ -267,4 +268,5 @@ export interface WindowAPI {
   confirmClose: () => void
   cancelClose: () => void
   pickImage: () => Promise<{ dataUri: string; name: string } | null>
+  readRelativeImage: (baseDir: string, relPath: string) => Promise<{ dataUri: string } | null>
 }

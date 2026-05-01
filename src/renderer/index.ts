@@ -33,6 +33,12 @@ let editorInstance: EditorInstance
 let tocVisible = false
 let splitterControls: { setPreviewCollapsed: (collapsed: boolean) => void } | null = null
 
+function dirOf(filePath: string | null): string | null {
+  if (!filePath) return null
+  const idx = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'))
+  return idx >= 0 ? filePath.slice(0, idx) : null
+}
+
 async function main(): Promise<void> {
   currentConfig = await window.electronAPI.getConfig()
   if (!currentConfig.customRules) currentConfig.customRules = []
@@ -347,6 +353,7 @@ async function newFile(): Promise<void> {
   isDirty = false
   editorInstance.setContent('', true)
   editorInstance.setLanguage('markdown')
+  editorInstance.setBaseDir(null)
   updateLangBadge()
   const previewContainer = document.getElementById('preview-content')!
   await updatePreview('', currentConfig.markdownStyles, previewContainer, currentConfig.theme, currentConfig.customRules)
@@ -368,6 +375,7 @@ function loadFileData(data: { content: string; filePath: string | null }): void 
   currentLanguage = detectLanguage(currentPath)
   editorInstance.setContent(currentContent, true)
   editorInstance.setLanguage(currentLanguage)
+  editorInstance.setBaseDir(dirOf(currentPath))
   updateLangBadge()
   splitterControls?.setPreviewCollapsed(currentLanguage !== 'markdown')
   const previewContainer = document.getElementById('preview-content')!
@@ -389,7 +397,12 @@ async function saveFile(): Promise<void> {
 
 async function saveFileAs(): Promise<void> {
   const result = await window.electronAPI.saveFileAs(currentContent)
-  if (result) { currentPath = result.filePath; isDirty = false; updateWindowTitle() }
+  if (result) {
+    currentPath = result.filePath
+    isDirty = false
+    editorInstance.setBaseDir(dirOf(currentPath))
+    updateWindowTitle()
+  }
 }
 
 async function exportPDF(): Promise<void> {
