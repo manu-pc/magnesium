@@ -64,7 +64,7 @@ export interface TableStyle {
 export interface CustomFormatRule {
   id: string
   name: string
-  triggerType: 'line-prefix' | 'inline-regex' | 'list-marker' | 'char-replace'
+  triggerType: 'line-prefix' | 'inline-regex' | 'list-marker' | 'char-replace' | 'delimiter-pair'
   trigger: string
   markerSymbol?: string
   replacement?: string

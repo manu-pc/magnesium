@@ -80,6 +80,38 @@ function escapeRegexStr(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
+// ---- delimiter-pair pre-processing (runs on raw markdown source) ----
+//
+// Replaces XtextX (where X is the rule's trigger string) with a raw HTML span
+// so the markers themselves disappear from the rendered output. Skips fenced
+// code blocks (```...```) so delimiters inside code are left untouched.
+
+function applyDelimiterPairRules(markdown: string, rules: CustomFormatRule[]): string {
+  const delimRules = rules.filter(r => r.enabled && r.triggerType === 'delimiter-pair' && r.trigger)
+  if (delimRules.length === 0) return markdown
+
+  // Split on fenced code blocks; only transform non-code segments.
+  const parts = markdown.split(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/g)
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 1) continue  // fenced code block — leave alone
+    let text = parts[i]
+    for (const rule of delimRules) {
+      const d = rule.trigger
+      const esc = escapeRegexStr(d)
+      // Match X<text>X where text is non-empty, has no newline, and doesn't
+      // contain the delimiter itself. Negative lookarounds prevent matching
+      // inside doubled delimiters (e.g. **bold** when the user picks '*').
+      const re = new RegExp(`(?<!${esc})${esc}([^\\n]+?)${esc}(?!${esc})`, 'g')
+      text = text.replace(re, (_m, inner: string) => {
+        if (inner.includes(d)) return _m
+        return `<span class="custom-rule-${rule.id}">${inner}</span>`
+      })
+    }
+    parts[i] = text
+  }
+  return parts.join('')
+}
+
 // ---- char-replace post-processing ----
 //
 // Operates on the HTML string, carefully skipping content inside code/pre tags.
@@ -157,6 +189,7 @@ function applyCustomRules(html: string, rules: CustomFormatRule[]): string {
   for (const rule of rules) {
     if (!rule.enabled) continue
     if (rule.triggerType === 'char-replace') continue  // already applied
+    if (rule.triggerType === 'delimiter-pair') continue  // pre-processed before markdown
 
     if (rule.triggerType === 'line-prefix') {
       const prefix = rule.trigger
@@ -278,7 +311,8 @@ export async function updatePreview(
   theme: 'light' | 'dark' = 'light',
   customRules: CustomFormatRule[] = []
 ): Promise<void> {
-  const result = await processor.process(markdown)
+  const preprocessed = applyDelimiterPairRules(markdown, customRules)
+  const result = await processor.process(preprocessed)
   const rawHtml = wrapTables(String(result))
   container.innerHTML = applyCustomRules(rawHtml, customRules)
 
@@ -361,7 +395,8 @@ export async function renderToHTMLString(
   styles: MarkdownStyles,
   customRules: CustomFormatRule[] = []
 ): Promise<string> {
-  const result = await processor.process(markdown)
+  const preprocessed = applyDelimiterPairRules(markdown, customRules)
+  const result = await processor.process(preprocessed)
   const rawHtml = wrapTables(String(result))
   const bodyContent = applyCustomRules(rawHtml, customRules)
 

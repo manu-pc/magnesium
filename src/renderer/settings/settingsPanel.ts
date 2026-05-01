@@ -610,10 +610,11 @@ function buildRuleFormHTML(rule?: Partial<CustomFormatRule>): string {
       <div class="control-row" style="margin-bottom:6px;">
         <span class="control-label">${t('rules.type')}</span>
         <select id="rf-trigger-type" style="flex:1;padding:4px 6px;border:1px solid var(--border-color);border-radius:4px;background:var(--bg-primary);color:var(--text-primary);font-size:12px;">
-          <option value="line-prefix"  ${triggerType==='line-prefix' ?'selected':''}>${t('rules.type.linePrefix')}</option>
-          <option value="inline-regex" ${triggerType==='inline-regex'?'selected':''}>${t('rules.type.inlineRegex')}</option>
-          <option value="list-marker"  ${triggerType==='list-marker' ?'selected':''}>${t('rules.type.listMarker')}</option>
-          <option value="char-replace" ${triggerType==='char-replace'?'selected':''}>${t('rules.type.charReplace')}</option>
+          <option value="line-prefix"    ${triggerType==='line-prefix'   ?'selected':''}>${t('rules.type.linePrefix')}</option>
+          <option value="inline-regex"   ${triggerType==='inline-regex'  ?'selected':''}>${t('rules.type.inlineRegex')}</option>
+          <option value="list-marker"    ${triggerType==='list-marker'   ?'selected':''}>${t('rules.type.listMarker')}</option>
+          <option value="char-replace"   ${triggerType==='char-replace'  ?'selected':''}>${t('rules.type.charReplace')}</option>
+          <option value="delimiter-pair" ${triggerType==='delimiter-pair'?'selected':''}>${t('rules.type.delimiterPair')}</option>
         </select>
       </div>
       <div id="rf-trigger-row" class="control-row" style="${isListMarker||isCharReplace?'display:none;':''}margin-bottom:6px;">
@@ -1357,6 +1358,7 @@ function wireRuleForm(formEl: HTMLElement, panel: HTMLElement, editId: string | 
     charReplaceRows.style.display = type==='char-replace' ? '' : 'none'
     if (type==='inline-regex') triggerEl.placeholder = '/pattern/gi'
     else if (type==='line-prefix') triggerEl.placeholder = '^'
+    else if (type==='delimiter-pair') triggerEl.placeholder = '~'
   }
 
   function validateRegex(): void {

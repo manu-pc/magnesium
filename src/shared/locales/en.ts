@@ -108,6 +108,7 @@ export const en: Record<string, string> = {
   'rules.type.inlineRegex': 'Inline Pattern (regex)',
   'rules.type.listMarker': 'List Marker',
   'rules.type.charReplace': 'Character Replacement',
+  'rules.type.delimiterPair': 'Delimiter Pair (like *bold*)',
   'rules.marker.character': 'Marker',
   'rules.marker.displaySymbol': 'Display symbol',
   'rules.marker.pickSymbol': 'Pick a symbol',

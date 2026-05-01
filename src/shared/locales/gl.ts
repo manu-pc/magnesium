@@ -108,6 +108,7 @@ export const gl: Record<string, string> = {
   'rules.type.inlineRegex': 'Patrón en liña (expresión regular)',
   'rules.type.listMarker': 'Marcador de lista',
   'rules.type.charReplace': 'Substitución de caracteres',
+  'rules.type.delimiterPair': 'Par de delimitadores (coma *grosa*)',
   'rules.marker.character': 'Marcador',
   'rules.marker.displaySymbol': 'Símbolo de visualización',
   'rules.marker.pickSymbol': 'Escoller un símbolo',

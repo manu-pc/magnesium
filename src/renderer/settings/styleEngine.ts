@@ -180,30 +180,31 @@ export function generateTableCSS(style: TableStyle, forPrint = false): string {
   return parts.join('\n\n')
 }
 
-function elementToCSS(selector: string, style: ElementStyle, isInline = false): string {
+function elementToCSS(selector: string, style: ElementStyle, isInline = false, important = false): string {
+  const i = important ? ' !important' : ''
   const parts: string[] = [
-    `font-family: ${style.fontFamily};`,
-    `font-size: ${style.fontSize}px;`,
-    `font-weight: ${style.fontWeight};`,
-    `font-style: ${style.fontStyle};`,
-    `color: ${style.color};`,
-    `line-height: ${style.lineHeight};`
+    `font-family: ${style.fontFamily}${i};`,
+    `font-size: ${style.fontSize}px${i};`,
+    `font-weight: ${style.fontWeight}${i};`,
+    `font-style: ${style.fontStyle}${i};`,
+    `color: ${style.color}${i};`,
+    `line-height: ${style.lineHeight}${i};`
   ]
   if (!isInline) {
-    parts.push(`margin-bottom: ${style.marginBottom}px;`)
+    parts.push(`margin-bottom: ${style.marginBottom}px${i};`)
   }
   if (style.backgroundColor !== undefined) {
-    parts.push(`background-color: ${style.backgroundColor};`)
+    parts.push(`background-color: ${style.backgroundColor}${i};`)
   }
   if (style.borderBottom !== undefined) {
-    parts.push(`border-bottom: ${style.borderBottom};`)
-    parts.push(`padding-bottom: 4px;`)
+    parts.push(`border-bottom: ${style.borderBottom}${i};`)
+    parts.push(`padding-bottom: 4px${i};`)
   }
   if (style.textTransform !== undefined) {
-    parts.push(`text-transform: ${style.textTransform};`)
+    parts.push(`text-transform: ${style.textTransform}${i};`)
   }
   if (style.textAlign !== undefined) {
-    parts.push(`text-align: ${style.textAlign};`)
+    parts.push(`text-align: ${style.textAlign}${i};`)
   }
   return `#preview-content ${selector} {\n  ${parts.join('\n  ')}\n}`
 }
@@ -341,20 +342,34 @@ export function generateCSS(
     const rs = theme === 'dark' ? adaptElementForDark(rule.style) : rule.style
     if (rule.triggerType === 'list-marker') {
       const hasMarker = !!rule.markerSymbol
-      rules.push(`#preview-content li.custom-rule-${rule.id} {
-  font-family: ${rs.fontFamily};
-  font-size: ${rs.fontSize}px;
-  font-weight: ${rs.fontWeight};
-  font-style: ${rs.fontStyle};
-  color: ${rs.color};
-  line-height: ${rs.lineHeight};${hasMarker ? '\n  list-style-type: none;' : ''}
+      // Style the <li> AND its descendants (p, span, strong, em, …) so that
+      // loose lists (which wrap content in <p>) and inline elements still
+      // inherit the rule rather than the default paragraph/strong/em styles.
+      rules.push(`#preview-content li.custom-rule-${rule.id},
+#preview-content li.custom-rule-${rule.id} p,
+#preview-content li.custom-rule-${rule.id} strong,
+#preview-content li.custom-rule-${rule.id} em,
+#preview-content li.custom-rule-${rule.id} span:not(.custom-marker) {
+  font-family: ${rs.fontFamily} !important;
+  font-size: ${rs.fontSize}px !important;
+  font-weight: ${rs.fontWeight} !important;
+  font-style: ${rs.fontStyle} !important;
+  color: ${rs.color} !important;
+  line-height: ${rs.lineHeight} !important;
+}
+#preview-content li.custom-rule-${rule.id} {${hasMarker ? '\n  list-style-type: none !important;' : ''}
+  margin-bottom: ${rs.marginBottom}px !important;
 }${hasMarker ? `
 #preview-content li.custom-rule-${rule.id} .custom-marker {
   margin-right: 0.5em;
-  color: ${rs.color};
+  color: ${rs.color} !important;
 }` : ''}`)
     } else {
-      rules.push(elementToCSS(`.custom-rule-${rule.id}`, rs, true))
+      // Inline custom rules (char-replace / inline-regex / line-prefix) — emit
+      // both the bare class selector AND list-descendant selectors so they
+      // beat the default ul/ol/p styles inside list items too.
+      rules.push(elementToCSS(`.custom-rule-${rule.id}`, rs, true, true))
+      rules.push(elementToCSS(`li .custom-rule-${rule.id}`, rs, true, true))
     }
   }
 
